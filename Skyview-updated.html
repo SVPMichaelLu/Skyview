@@ -1,0 +1,2066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skyview – The Grand</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.19.1/umd/index.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #0a0a0c;
+    --bg-2:     #111116;
+    --bg-3:     #18181f;
+    --bg-card:  #13131a;
+    --gold:     #c9a84c;
+    --gold-lt:  #e2c47a;
+    --gold-dk:  #8a6b28;
+    --border:   rgba(201,168,76,0.22);
+    --border-2: rgba(201,168,76,0.45);
+    --text:     #f0ead8;
+    --text-2:   #a89970;
+    --text-3:   #5a5040;
+    --danger:   #a33030;
+    --serif:    'Cormorant Garamond', Georgia, serif;
+    --sans:     'Montserrat', sans-serif;
+    --mono:     'DM Mono', monospace;
+    --radius:   10px;
+    --tr:       0.22s ease;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    padding: 0;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(180,140,50,0.10) 0%, transparent 70%),
+      repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(201,168,76,0.03) 80px),
+      repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(201,168,76,0.03) 80px);
+  }
+
+  /* HEADER */
+  header {
+    background: rgba(8,8,10,0.95);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 62px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+  }
+
+  .logo { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
+
+  .logo-eyebrow {
+    font-family: var(--sans);
+    font-size: 8px;
+    font-weight: 500;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .logo-text {
+    font-family: var(--serif);
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    color: var(--text);
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  .logo-text em {
+    font-style: normal;
+    color: var(--gold);
+  }
+
+  .header-count {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-2);
+    letter-spacing: 0.08em;
+    border: 1px solid var(--border);
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  /* GOLD DIVIDER */
+  .gold-rule {
+    width: 40px;
+    height: 1px;
+    background: var(--gold);
+    margin: 0 auto 20px;
+    opacity: 0.6;
+  }
+
+  /* MAIN */
+  main {
+    padding: 28px 16px 160px;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  /* CARDS */
+  .card-stack { display: flex; flex-direction: column; gap: 14px; }
+
+  .member-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color var(--tr), box-shadow var(--tr);
+  }
+
+  .member-card:hover {
+    border-color: var(--border-2);
+    box-shadow: 0 0 24px rgba(201,168,76,0.08);
+  }
+
+  .card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 16px 11px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(201,168,76,0.04);
+  }
+
+  .card-meta { flex: 1; min-width: 0; }
+
+  .card-gym {
+    font-family: var(--serif);
+    font-size: 17px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+  }
+
+  .card-member {
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    color: var(--gold);
+    margin-top: 3px;
+    text-transform: uppercase;
+    font-family: var(--sans);
+  }
+
+  .card-color-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 12px;
+    flex-shrink: 0;
+    opacity: 0.85;
+  }
+
+  .card-actions { display: flex; gap: 6px; }
+
+  .icon-btn {
+    width: 30px;
+    height: 30px;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-2);
+    transition: all var(--tr);
+  }
+
+  .icon-btn:hover { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.07); }
+  .icon-btn.danger:hover { border-color: var(--danger); color: #e07070; background: rgba(160,48,48,0.12); }
+
+  .card-barcode {
+    padding: 18px 16px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #fff;
+    cursor: pointer;
+    transition: background var(--tr);
+    position: relative;
+  }
+
+  .card-barcode::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.5;
+  }
+
+  .card-barcode:hover { background: #f9f9f9; }
+  .card-barcode canvas { max-width: 100%; height: 68px; }
+
+  .card-code {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: #666;
+    margin-top: 6px;
+    letter-spacing: 0.16em;
+  }
+
+  .scan-hint {
+    font-size: 10px;
+    color: #bbb;
+    margin-top: 3px;
+    letter-spacing: 0.06em;
+    font-family: var(--sans);
+    text-transform: uppercase;
+  }
+
+  /* EMPTY STATE */
+  .empty {
+    text-align: center;
+    padding: 56px 24px;
+    color: var(--text-3);
+  }
+
+  .empty-ornament {
+    font-family: var(--serif);
+    font-size: 48px;
+    color: var(--gold-dk);
+    opacity: 0.5;
+    margin-bottom: 12px;
+    letter-spacing: 0.3em;
+  }
+
+  .empty h3 {
+    font-family: var(--serif);
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    color: var(--text-2);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .empty p { font-size: 12px; line-height: 1.8; letter-spacing: 0.05em; color: var(--text-3); }
+
+  /* ADD BUTTON */
+  .fab {
+    position: fixed;
+    bottom: 62px;
+    right: 24px;
+    left: 24px;
+    max-width: 488px;
+    margin: 0 auto;
+    background: var(--gold);
+    color: #0a0a0c;
+    border: none;
+    border-radius: var(--radius);
+    padding: 15px 24px;
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: background var(--tr), transform var(--tr);
+    z-index: 50;
+  }
+
+  .fab:hover { background: var(--gold-lt); }
+  .fab:active { transform: scale(0.98); }
+
+  /* MODAL */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-backdrop.open { display: flex; }
+
+  .modal {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 28px 24px 32px;
+    width: 100%;
+    max-width: 440px;
+    animation: modalIn 0.22s ease;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  .modal::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 18px 18px 0 0;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.6;
+  }
+
+  @keyframes modalIn {
+    from { transform: scale(0.94) translateY(8px); opacity: 0; }
+    to   { transform: scale(1) translateY(0); opacity: 1; }
+  }
+
+  .modal h2 {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .modal-sub {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 22px;
+    display: block;
+  }
+
+  .form-group { margin-bottom: 14px; }
+
+  label {
+    display: block;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    padding: 11px 14px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: var(--sans);
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color var(--tr);
+  }
+
+  input[type="text"]:focus { border-color: var(--gold); }
+  input[type="text"]::placeholder { color: var(--text-3); }
+
+  .color-picker { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .color-opt {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.15s, border-color 0.15s;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+
+  .color-opt:hover { transform: scale(1.12); }
+  .color-opt.selected { outline-color: var(--gold); transform: scale(1.12); }
+
+  .barcode-preview {
+    background: #fff;
+    border-radius: 6px;
+    padding: 12px 8px 8px;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 8px;
+    border: 1px solid rgba(201,168,76,0.3);
+  }
+
+  .barcode-preview canvas { max-width: 100%; }
+  .barcode-preview .preview-code { font-family: var(--mono); font-size: 11px; color: #666; margin-top: 4px; }
+
+  .err-msg { font-size: 12px; color: #e07070; margin-top: 8px; display: none; letter-spacing: 0.04em; }
+
+  .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+
+  .btn-save {
+    flex: 1;
+    background: var(--gold);
+    color: #0a0a0c;
+    border: none;
+    border-radius: 6px;
+    padding: 13px;
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background var(--tr);
+  }
+
+  .btn-save:hover { background: var(--gold-lt); }
+
+  .btn-cancel {
+    background: transparent;
+    color: var(--text-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 13px 20px;
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: border-color var(--tr), color var(--tr);
+  }
+
+  .btn-cancel:hover { border-color: var(--border-2); color: var(--text); }
+
+  .modal-close-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 30px;
+    height: 30px;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color var(--tr), color var(--tr);
+  }
+
+  .modal-close-btn:hover { border-color: var(--border-2); color: var(--text-2); }
+
+  /* FULLSCREEN SCAN VIEW */
+  .scan-view {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #fff;
+    z-index: 300;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px;
+  }
+
+  .scan-view.open { display: flex; }
+
+  .scan-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 36px;
+    height: 36px;
+    background: #f0f0f0;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+  }
+
+  .scan-eyebrow { font-family: var(--sans); font-size: 9px; letter-spacing: 0.3em; color: #b8922a; text-transform: uppercase; margin-bottom: 4px; text-align: center; }
+  .scan-gym { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 400; letter-spacing: 0.12em; text-transform: uppercase; color: #111; margin-bottom: 4px; text-align: center; }
+  .scan-member { font-size: 11px; letter-spacing: 0.2em; color: #888; margin-bottom: 32px; text-align: center; text-transform: uppercase; font-family: var(--sans); }
+
+  .scan-barcode canvas { max-width: 100%; }
+  .scan-code { font-family: var(--mono); font-size: 14px; color: #555; margin-top: 14px; letter-spacing: 0.2em; }
+
+  .scan-divider { width: 40px; height: 1px; background: #c9a84c; margin: 20px auto 0; opacity: 0.6; }
+  .scan-tip { font-size: 11px; color: #aaa; margin-top: 16px; text-align: center; letter-spacing: 0.08em; font-family: var(--sans); }
+
+  /* SETUP PAGE */
+  #setup-page {
+    display: none;
+    min-height: 100vh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px 60px;
+    text-align: center;
+  }
+
+  #setup-page.active { display: flex; }
+
+  .setup-ornament {
+    font-family: var(--serif);
+    font-size: 11px;
+    letter-spacing: 0.45em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .setup-title {
+    font-family: var(--serif);
+    font-size: 38px;
+    font-weight: 300;
+    letter-spacing: 0.14em;
+    color: var(--text);
+    text-transform: uppercase;
+    line-height: 1.15;
+    margin-bottom: 6px;
+  }
+
+  .setup-title em {
+    font-style: normal;
+    color: var(--gold);
+  }
+
+  .setup-divider {
+    width: 50px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.5;
+    margin: 18px auto 14px;
+  }
+
+  .setup-subtitle {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--text-3);
+    text-transform: uppercase;
+    margin-bottom: 40px;
+    line-height: 1.8;
+  }
+
+  .building-options {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .building-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: border-color var(--tr), background var(--tr), box-shadow var(--tr);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .building-btn::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--gold);
+    opacity: 0;
+    transition: opacity var(--tr);
+  }
+
+  .building-btn:hover {
+    border-color: var(--border-2);
+    background: rgba(201,168,76,0.05);
+    box-shadow: 0 0 20px rgba(201,168,76,0.07);
+  }
+
+  .building-btn:hover::before { opacity: 1; }
+
+  .building-btn-label {
+    font-family: var(--serif);
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    color: var(--text);
+    text-transform: uppercase;
+  }
+
+  .building-btn-sub {
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-top: 3px;
+    font-family: var(--sans);
+  }
+
+  .building-btn-arrow {
+    color: var(--gold);
+    opacity: 0.5;
+    font-size: 18px;
+    transition: opacity var(--tr), transform var(--tr);
+  }
+
+  .building-btn:hover .building-btn-arrow { opacity: 1; transform: translateX(3px); }
+
+  /* HEADER building badge */
+  .header-building {
+    font-family: var(--sans);
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    color: var(--gold);
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    padding: 3px 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: border-color var(--tr);
+  }
+
+  .header-building:hover { border-color: var(--border-2); }
+
+  #app-page { display: none; }
+  #app-page.active { display: block; }
+
+  /* LOGIN PAGE */
+  #login-page {
+    display: none;
+    min-height: 100vh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px 60px;
+  }
+  #login-page.active { display: flex; }
+
+  .login-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 36px;
+  }
+
+  .login-logo-eyebrow {
+    font-family: var(--sans);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.45em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .login-logo-title {
+    font-family: var(--serif);
+    font-size: 42px;
+    font-weight: 300;
+    letter-spacing: 0.16em;
+    color: var(--text);
+    text-transform: uppercase;
+    line-height: 1.1;
+    text-align: center;
+  }
+
+  .login-logo-title em {
+    font-style: normal;
+    color: var(--gold);
+  }
+
+  .login-divider {
+    width: 50px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.45;
+    margin: 20px auto 28px;
+  }
+
+  .login-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 32px 28px 28px;
+    width: 100%;
+    max-width: 360px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .login-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.6;
+  }
+
+  .login-box-title {
+    font-family: var(--serif);
+    font-size: 18px;
+    font-weight: 400;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .login-box-sub {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--text-3);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    display: block;
+  }
+
+  .login-form-group { margin-bottom: 16px; }
+
+  .login-form-group label {
+    display: block;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+  }
+
+  .login-form-group input {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    font-family: var(--sans);
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color var(--tr);
+  }
+
+  .login-form-group input:focus { border-color: var(--gold); }
+  .login-form-group input::placeholder { color: var(--text-3); font-size: 13px; }
+
+  .login-remember {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 4px 0 22px;
+    cursor: pointer;
+  }
+
+  .login-remember input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--gold);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .login-remember span {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--text-3);
+    text-transform: uppercase;
+  }
+
+  .login-btn {
+    width: 100%;
+    background: var(--gold);
+    color: #0a0a0c;
+    border: none;
+    border-radius: 7px;
+    padding: 14px;
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background var(--tr), transform var(--tr);
+  }
+
+  .login-btn:hover { background: var(--gold-lt); }
+  .login-btn:active { transform: scale(0.98); }
+
+  .login-err {
+    font-size: 12px;
+    color: #e07070;
+    letter-spacing: 0.06em;
+    margin-top: 12px;
+    text-align: center;
+    display: none;
+    min-height: 18px;
+  }
+
+  .login-new-hint {
+    font-size: 11px;
+    color: var(--text-3);
+    letter-spacing: 0.1em;
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .login-new-hint a {
+    color: var(--gold);
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .login-new-hint a:hover { color: var(--gold-lt); }
+
+  /* REGISTER BUILDING SELECTOR */
+  .reg-building-opts {
+    display: flex;
+    gap: 8px;
+  }
+
+  .reg-building-btn {
+    flex: 1;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 10px 6px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    transition: border-color var(--tr), background var(--tr);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .reg-building-btn::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--gold);
+    opacity: 0;
+    transition: opacity var(--tr);
+  }
+
+  .reg-building-btn:hover {
+    border-color: var(--border-2);
+    background: rgba(201,168,76,0.05);
+  }
+
+  .reg-building-btn.selected {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.08);
+  }
+
+  .reg-building-btn.selected::before { opacity: 1; }
+
+  .reg-building-name {
+    font-family: var(--serif);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--text);
+    text-transform: uppercase;
+  }
+
+  .reg-building-btn.selected .reg-building-name { color: var(--gold-lt); }
+
+  .reg-building-sub {
+    font-family: var(--sans);
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    color: var(--text-3);
+    text-transform: uppercase;
+  }
+
+  .reg-building-btn.selected .reg-building-sub { color: var(--gold-dk); }
+
+  /* REGISTER FORM (inside login box, toggled) */
+  #reg-section { display: none; }
+  #reg-section.active { display: block; }
+  #signin-section { display: block; }
+  #signin-section.hidden { display: none; }
+
+  /* HEADER logout btn */
+  .header-logout {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-family: var(--sans);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    cursor: pointer;
+    transition: border-color var(--tr), color var(--tr);
+  }
+
+  .header-logout:hover { border-color: var(--border-2); color: var(--text-2); }
+
+  /* SPONSOR CREDIT */
+  /* CAMERA SCAN BUTTON */
+  .code-input-row {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  .scan-cam-btn {
+    flex-shrink: 0;
+    width: 44px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold);
+    transition: border-color var(--tr), background var(--tr);
+  }
+
+  .scan-cam-btn:hover {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.1);
+  }
+
+  /* CAMERA OVERLAY */
+  #cam-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+
+  #cam-overlay.open { display: flex; }
+
+  #cam-box {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 24px 20px 20px;
+    width: 92%;
+    max-width: 380px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+  }
+
+  #cam-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 18px 18px 0 0;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.7;
+  }
+
+  .cam-title {
+    font-family: var(--serif);
+    font-size: 18px;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+
+  .cam-hint {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--text-3);
+    text-transform: uppercase;
+  }
+
+  .cam-viewport {
+    width: 100%;
+    aspect-ratio: 4/3;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #000;
+    position: relative;
+  }
+
+  #cam-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .cam-reticle {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cam-corner {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    border-color: var(--gold);
+    border-style: solid;
+    opacity: 0.9;
+  }
+
+  .cam-corner.tl { top: 18%; left: 10%; border-width: 2px 0 0 2px; border-radius: 3px 0 0 0; }
+  .cam-corner.tr { top: 18%; right: 10%; border-width: 2px 2px 0 0; border-radius: 0 3px 0 0; }
+  .cam-corner.bl { bottom: 18%; left: 10%; border-width: 0 0 2px 2px; border-radius: 0 0 0 3px; }
+  .cam-corner.br { bottom: 18%; right: 10%; border-width: 0 2px 2px 0; border-radius: 0 0 3px 0; }
+
+  .cam-scan-line {
+    position: absolute;
+    left: 10%; right: 10%;
+    height: 1.5px;
+    background: var(--gold);
+    opacity: 0.7;
+    animation: scanMove 2s ease-in-out infinite;
+  }
+
+  @keyframes scanMove {
+    0%   { top: 18%; }
+    50%  { top: 82%; }
+    100% { top: 18%; }
+  }
+
+  .cam-status {
+    font-size: 12px;
+    color: var(--text-3);
+    letter-spacing: 0.08em;
+    min-height: 18px;
+    text-align: center;
+  }
+
+  .cam-close-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 10px 32px;
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-2);
+    cursor: pointer;
+    transition: border-color var(--tr), color var(--tr);
+    width: 100%;
+  }
+
+  .cam-close-btn:hover { border-color: var(--border-2); color: var(--text); }
+
+  /* RESERVATIONS SECTION */
+  .res-section {
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 0 16px 20px;
+  }
+
+  .res-section-title {
+    font-family: var(--serif);
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .res-section-sub {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: var(--text-3);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .res-divider {
+    width: 32px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.5;
+    margin-bottom: 16px;
+  }
+
+  .amenity-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .amenity-tile {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 10px 12px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transition: border-color var(--tr), background var(--tr), box-shadow var(--tr);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .amenity-tile::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--gold);
+    opacity: 0;
+    transition: opacity var(--tr);
+  }
+
+  .amenity-tile:hover {
+    border-color: var(--border-2);
+    background: rgba(201,168,76,0.05);
+    box-shadow: 0 0 16px rgba(201,168,76,0.07);
+  }
+
+  .amenity-tile:hover::before { opacity: 1; }
+
+  .amenity-icon {
+    font-size: 22px;
+    line-height: 1;
+  }
+
+  .amenity-name {
+    font-family: var(--sans);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-2);
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  /* MY RESERVATIONS */
+  .my-res-list {
+    margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .res-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .res-item-left { flex: 1; min-width: 0; }
+
+  .res-item-amenity {
+    font-family: var(--serif);
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+
+  .res-item-when {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    margin-top: 2px;
+    font-family: var(--mono);
+  }
+
+  .res-cancel-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    width: 26px;
+    height: 26px;
+    cursor: pointer;
+    color: var(--text-3);
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all var(--tr);
+  }
+
+  .res-cancel-btn:hover { border-color: var(--danger); color: #e07070; background: rgba(160,48,48,0.12); }
+
+  /* BOOKING MODAL */
+  #book-modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 300;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+
+  #book-modal-backdrop.open { display: flex; }
+
+  .book-modal {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 28px 24px 28px;
+    width: 100%;
+    max-width: 380px;
+    position: relative;
+    animation: modalIn 0.22s ease;
+  }
+
+  .book-modal::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 18px 18px 0 0;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.6;
+  }
+
+  .book-modal-close {
+    position: absolute;
+    top: 14px; right: 14px;
+    width: 28px; height: 28px;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--text-3);
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color var(--tr), color var(--tr);
+  }
+
+  .book-modal-close:hover { border-color: var(--border-2); color: var(--text-2); }
+
+  .book-amenity-name {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .book-sub {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 22px;
+    display: block;
+  }
+
+  .book-form-group { margin-bottom: 14px; }
+
+  .book-form-group label {
+    display: block;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .book-form-group input[type="date"],
+  .book-form-group select {
+    width: 100%;
+    padding: 11px 14px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    font-family: var(--sans);
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color var(--tr);
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .book-form-group input[type="date"]:focus,
+  .book-form-group select:focus { border-color: var(--gold); }
+
+  .book-form-group input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.6); }
+
+  .book-form-group select option { background: var(--bg-3); color: var(--text); }
+
+  .book-err { font-size: 12px; color: #e07070; margin-top: 8px; display: none; letter-spacing: 0.04em; }
+
+  .book-btn {
+    width: 100%;
+    background: var(--gold);
+    color: #0a0a0c;
+    border: none;
+    border-radius: 7px;
+    padding: 14px;
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 18px;
+    transition: background var(--tr);
+  }
+
+  .book-btn:hover { background: var(--gold-lt); }
+
+  /* CONTACT BAR */
+  .contact-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 10px 24px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(10,10,12,0.96);
+    border-top: 1px solid var(--border);
+    backdrop-filter: blur(8px);
+    z-index: 49;
+  }
+
+  .contact-bar-label {
+    font-family: var(--sans);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    white-space: nowrap;
+  }
+
+  .contact-bar-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .contact-bar-email {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--gold);
+    text-decoration: none;
+    transition: color var(--tr);
+  }
+
+  .contact-bar-email:hover { color: var(--gold-lt); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-eyebrow">Skyview</span>
+    <span class="logo-text">The <em>Grand</em></span>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <span class="header-building" id="hdr-building" onclick="goSetup()" title="Change building"></span>
+    <span class="header-count" id="hdr-count"></span>
+    <button class="header-logout" id="hdr-logout" style="display:none;" onclick="logout()">Sign out</button>
+  </div>
+</header>
+
+<!-- LOGIN PAGE -->
+<div id="login-page">
+  <div class="login-logo">
+    <span class="login-logo-eyebrow">&#10022; &nbsp; Resident Portal &nbsp; &#10022;</span>
+    <div class="login-logo-title">Skyview<br><em>The Grand</em></div>
+  </div>
+  <div class="login-divider"></div>
+
+  <div class="login-box">
+
+    <!-- SIGN IN -->
+    <div id="signin-section">
+      <p class="login-box-title">Welcome back</p>
+      <span class="login-box-sub">Sign in to your account</span>
+      <div class="login-form-group">
+        <label>Email address</label>
+        <input type="email" id="li-user" placeholder="Enter your email address" autocomplete="email">
+      </div>
+      <div class="login-form-group">
+        <label>Password</label>
+        <input type="password" id="li-pass" placeholder="Enter your password" autocomplete="current-password" onkeydown="if(event.key==='Enter') doLogin()">
+      </div>
+      <label class="login-remember">
+        <input type="checkbox" id="li-remember">
+        <span>Remember me</span>
+      </label>
+      <button class="login-btn" onclick="doLogin()">Sign In</button>
+      <p class="login-err" id="li-err"></p>
+      <p class="login-new-hint">New resident? <a onclick="showRegister()">Create an account</a></p>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="reg-section">
+      <p class="login-box-title">Create account</p>
+      <span class="login-box-sub">Register as a new resident</span>
+      <div class="login-form-group">
+        <label>Full name</label>
+        <input type="text" id="reg-name" placeholder="e.g. Alex Johnson">
+      </div>
+      <div class="login-form-group">
+        <label>Email address</label>
+        <input type="email" id="reg-email" placeholder="e.g. alex@email.com" autocomplete="email">
+      </div>
+      <div class="login-form-group">
+        <label>Residence tower</label>
+        <div class="reg-building-opts">
+          <button type="button" class="reg-building-btn" id="rb-1" onclick="pickRegBuilding('Grand One',this)">
+            <span class="reg-building-name">Grand One</span>
+            <span class="reg-building-sub">Tower I</span>
+          </button>
+          <button type="button" class="reg-building-btn" id="rb-2" onclick="pickRegBuilding('Grand Two',this)">
+            <span class="reg-building-name">Grand Two</span>
+            <span class="reg-building-sub">Tower II</span>
+          </button>
+          <button type="button" class="reg-building-btn" id="rb-3" onclick="pickRegBuilding('Grand Three',this)">
+            <span class="reg-building-name">Grand Three</span>
+            <span class="reg-building-sub">Tower III</span>
+          </button>
+        </div>
+      </div>
+      <div class="login-form-group">
+        <label>Apartment unit</label>
+        <input type="text" id="reg-unit" placeholder="e.g. 8D – PH3Z">
+      </div>
+      <div class="login-form-group">
+        <label>Password</label>
+        <input type="password" id="reg-pass" placeholder="Choose a password" autocomplete="new-password">
+      </div>
+      <div class="login-form-group">
+        <label>Confirm password</label>
+        <input type="password" id="reg-pass2" placeholder="Repeat your password" autocomplete="new-password" onkeydown="if(event.key==='Enter') doRegister()">
+      </div>
+      <button class="login-btn" onclick="doRegister()">Create Account</button>
+      <p class="login-err" id="reg-err"></p>
+      <p class="login-new-hint">Already have an account? <a onclick="showSignin()">Sign in</a></p>
+    </div>
+
+  </div>
+</div>
+
+<!-- SETUP PAGE -->
+<div id="setup-page">
+  <p class="setup-ornament">&#10022; &nbsp; Welcome &nbsp; &#10022;</p>
+  <h1 class="setup-title">Skyview<br><em>The Grand</em></h1>
+  <div class="setup-divider"></div>
+  <p class="setup-subtitle">Select your residence tower<br>to get started</p>
+  <div class="building-options">
+    <button class="building-btn" onclick="selectBuilding('Grand One')">
+      <div>
+        <div class="building-btn-label">Grand One</div>
+        <div class="building-btn-sub">Tower I &nbsp;·&nbsp; Skyview Parc</div>
+      </div>
+      <span class="building-btn-arrow">&#8250;</span>
+    </button>
+    <button class="building-btn" onclick="selectBuilding('Grand Two')">
+      <div>
+        <div class="building-btn-label">Grand Two</div>
+        <div class="building-btn-sub">Tower II &nbsp;·&nbsp; Skyview Parc</div>
+      </div>
+      <span class="building-btn-arrow">&#8250;</span>
+    </button>
+    <button class="building-btn" onclick="selectBuilding('Grand Three')">
+      <div>
+        <div class="building-btn-label">Grand Three</div>
+        <div class="building-btn-sub">Tower III &nbsp;·&nbsp; Skyview Parc</div>
+      </div>
+      <span class="building-btn-arrow">&#8250;</span>
+    </button>
+  </div>
+</div>
+
+<!-- MAIN APP PAGE -->
+<div id="app-page">
+<main>
+  <div class="card-stack" id="card-stack"></div>
+  <div id="res-section" style="display:none;">
+    <div class="res-section">
+      <p class="res-section-title">Amenities</p>
+      <span class="res-section-sub">Reserve a space</span>
+      <div class="res-divider"></div>
+      <div class="amenity-grid" id="amenity-grid"></div>
+    </div>
+    <div class="res-section" style="padding-top:0;">
+      <p class="res-section-title" style="font-size:16px; margin-bottom:2px;">My Reservations</p>
+      <span class="res-section-sub" style="margin-bottom:12px;">Upcoming bookings</span>
+      <div class="my-res-list" id="my-res-list"></div>
+    </div>
+  </div>
+</main>
+
+<button class="fab" id="add-card-fab" onclick="openModal()">
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  Add card
+</button>
+
+<div class="contact-bar">
+  <span class="contact-bar-label">Concierge</span>
+  <div class="contact-bar-line"></div>
+  <a class="contact-bar-email" id="contact-email" href="#"></a>
+</div>
+</div>
+
+<!-- BOOKING MODAL -->
+<div id="book-modal-backdrop" onclick="handleBookBackdrop(event)">
+  <div class="book-modal">
+    <button class="book-modal-close" onclick="closeBookModal()">&#x2715;</button>
+    <p class="book-amenity-name" id="book-amenity-name"></p>
+    <span class="book-sub">Reserve your spot</span>
+    <div class="book-form-group">
+      <label>Date</label>
+      <input type="date" id="book-date">
+    </div>
+    <div class="book-form-group">
+      <label>Time slot</label>
+      <select id="book-time">
+        <option value="">Select a time</option>
+        <option>7:00 AM – 8:00 AM</option>
+        <option>8:00 AM – 9:00 AM</option>
+        <option>9:00 AM – 10:00 AM</option>
+        <option>10:00 AM – 11:00 AM</option>
+        <option>11:00 AM – 12:00 PM</option>
+        <option>12:00 PM – 1:00 PM</option>
+        <option>1:00 PM – 2:00 PM</option>
+        <option>2:00 PM – 3:00 PM</option>
+        <option>3:00 PM – 4:00 PM</option>
+        <option>4:00 PM – 5:00 PM</option>
+        <option>5:00 PM – 6:00 PM</option>
+        <option>6:00 PM – 7:00 PM</option>
+        <option>7:00 PM – 8:00 PM</option>
+        <option>8:00 PM – 9:00 PM</option>
+      </select>
+    </div>
+    <p class="book-err" id="book-err"></p>
+    <button class="book-btn" onclick="confirmBooking()">Confirm Reservation</button>
+  </div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="modal-backdrop" id="modal" onclick="handleBackdrop(event)">
+  <div class="modal">
+    <button class="modal-close-btn" onclick="closeModal()" title="Close">&#x2715;</button>
+    <h2 id="modal-title">New Card</h2>
+    <span class="modal-sub">Skyview — The Grand</span>
+    <div class="form-group">
+      <label>Holder name</label>
+      <input type="text" id="inp-holder" placeholder="e.g. Alex Johnson">
+    </div>
+    <div class="form-group">
+      <label>Barcode number</label>
+      <div class="code-input-row">
+        <input type="text" id="inp-code" placeholder="Type or scan member number" oninput="livePreview()" style="flex:1;">
+        <button type="button" class="scan-cam-btn" onclick="openCamScanner()" title="Scan with camera">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8V5a2 2 0 0 1 2-2h3M2 16v3a2 2 0 0 0 2 2h3M22 8V5a2 2 0 0 0-2-2h-3M22 16v3a2 2 0 0 1-2 2h-3"/><line x1="7" y1="12" x2="17" y2="12"/></svg>
+        </button>
+      </div>
+      <div class="barcode-preview" id="bc-preview">
+        <canvas id="preview-canvas"></canvas>
+        <span class="preview-code" id="preview-code-text"></span>
+      </div>
+    </div>
+
+<!-- CAMERA SCANNER OVERLAY -->
+<div id="cam-overlay">
+  <div id="cam-box">
+    <p class="cam-title">Scan barcode</p>
+    <p class="cam-hint">Point camera at the barcode</p>
+    <div class="cam-viewport">
+      <video id="cam-video" playsinline></video>
+      <div class="cam-reticle">
+        <div class="cam-corner tl"></div>
+        <div class="cam-corner tr"></div>
+        <div class="cam-corner bl"></div>
+        <div class="cam-corner br"></div>
+        <div class="cam-scan-line"></div>
+      </div>
+    </div>
+    <p class="cam-status" id="cam-status">Starting camera…</p>
+    <button class="cam-close-btn" onclick="closeCamScanner()">Cancel</button>
+  </div>
+</div>
+    <div class="form-group">
+      <label>Card color</label>
+      <div class="color-picker" id="color-picker"></div>
+    </div>
+    <p class="err-msg" id="err-msg"></p>
+    <div class="modal-btns">
+      <button class="btn-save" onclick="saveCard()">Save card</button>
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- FULLSCREEN SCAN VIEW -->
+<div class="scan-view" id="scan-view">
+  <button class="scan-close" onclick="closeScan()">&#x2715;</button>
+  <p class="scan-eyebrow">Skyview — The Grand</p>
+  <p class="scan-gym" id="sv-gym"></p>
+  <p class="scan-member" id="sv-member"></p>
+  <div class="scan-barcode"><canvas id="sv-canvas"></canvas></div>
+  <p class="scan-code" id="sv-code"></p>
+  <div class="scan-divider"></div>
+  <p class="scan-tip">Tap anywhere to close</p>
+</div>
+
+<script>
+const COLORS = ['#1a1a1a','#2e6fdc','#1d9e75','#d4a847','#d85a30','#993556','#534ab7','#993c1d'];
+const COLOR_LABELS = ['Slate','Blue','Teal','Gold','Orange','Rose','Purple','Brick'];
+let cards = [];
+let editIdx = -1;
+let selectedColor = COLORS[0];
+let currentBuilding = null;
+let currentUser = null;
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ── AUTH helpers ── */
+function usersDB(){
+  try { return JSON.parse(localStorage.getItem('bcw-users') || '{}'); } catch(e){ return {}; }
+}
+function saveUsersDB(db){
+  try { localStorage.setItem('bcw-users', JSON.stringify(db)); } catch(e){}
+}
+function hashish(s){ let h=0; for(let i=0;i<s.length;i++) h=(Math.imul(31,h)+s.charCodeAt(i))|0; return h.toString(36); }
+
+function showRegister(){
+  selectedRegBuilding = null;
+  document.querySelectorAll('.reg-building-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('signin-section').classList.add('hidden');
+  document.getElementById('reg-section').classList.add('active');
+  document.getElementById('li-err').style.display='none';
+  document.getElementById('reg-err').style.display='none';
+}
+function showSignin(){
+  document.getElementById('reg-section').classList.remove('active');
+  document.getElementById('signin-section').classList.remove('hidden');
+  document.getElementById('li-err').style.display='none';
+  document.getElementById('reg-err').style.display='none';
+}
+
+function doLogin(){
+  const email = document.getElementById('li-user').value.trim().toLowerCase();
+  const pass = document.getElementById('li-pass').value;
+  const remember = document.getElementById('li-remember').checked;
+  const err = document.getElementById('li-err');
+  if(!email||!pass){ showErr(err,'Please enter your email and password.'); return; }
+  const db = usersDB();
+  const key = Object.keys(db).find(k => (db[k].email||'').toLowerCase() === email);
+  if(!key || db[key].hash !== hashish(pass)){
+    showErr(err,'Incorrect email or password.'); return;
+  }
+  err.style.display='none';
+  currentUser = { username: key, name: db[key].name, email: db[key].email||'', unit: db[key].unit||'', building: db[key].building||'' };
+  if(remember){
+    try { localStorage.setItem('bcw-session', JSON.stringify(currentUser)); } catch(e){}
+  } else {
+    try { localStorage.removeItem('bcw-session'); } catch(e){}
+  }
+  enterApp();
+}
+
+let selectedRegBuilding = null;
+
+function pickRegBuilding(name, el){
+  selectedRegBuilding = name;
+  document.querySelectorAll('.reg-building-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function doRegister(){
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim().toLowerCase();
+  const unit = document.getElementById('reg-unit').value.trim();
+  const pass = document.getElementById('reg-pass').value;
+  const pass2 = document.getElementById('reg-pass2').value;
+  const err = document.getElementById('reg-err');
+  if(!name){ showErr(err,'Please enter your full name.'); return; }
+  if(!email || !email.includes('@')){ showErr(err,'Please enter a valid email address.'); return; }
+  if(!selectedRegBuilding){ showErr(err,'Please select your residence tower.'); return; }
+  if(!unit){ showErr(err,'Please enter your apartment unit.'); return; }
+  if(!pass || pass.length < 4){ showErr(err,'Password must be at least 4 characters.'); return; }
+  if(pass !== pass2){ showErr(err,'Passwords do not match.'); return; }
+  const db = usersDB();
+  const exists = Object.keys(db).some(k => (db[k].email||'').toLowerCase() === email);
+  if(exists){ showErr(err,'An account with this email already exists.'); return; }
+  const key = email;
+  db[key] = { name, email, unit, building: selectedRegBuilding, hash: hashish(pass) };
+  saveUsersDB(db);
+  err.style.display='none';
+  currentUser = { username: key, name, email, unit, building: selectedRegBuilding };
+  try { localStorage.setItem('bcw-session', JSON.stringify(currentUser)); } catch(e){}
+  enterApp();
+}
+
+function logout(){
+  currentUser = null;
+  currentBuilding = null;
+  try { localStorage.removeItem('bcw-session'); localStorage.removeItem('bcw-building'); } catch(e){}
+  document.getElementById('hdr-logout').style.display='none';
+  document.getElementById('hdr-building').textContent='';
+  document.getElementById('hdr-count').textContent='';
+  document.getElementById('app-page').classList.remove('active');
+  document.getElementById('setup-page').classList.remove('active');
+  document.getElementById('login-page').classList.add('active');
+  document.getElementById('li-user').value='';
+  document.getElementById('li-pass').value='';
+  showSignin();
+}
+
+function enterApp(){
+  document.getElementById('login-page').classList.remove('active');
+  document.getElementById('hdr-logout').style.display='';
+  const savedBuilding = (() => { try { return localStorage.getItem('bcw-building'); } catch(e){ return null; } })();
+  const defaultBuilding = savedBuilding || (currentUser && currentUser.building) || null;
+  if(defaultBuilding){ selectBuilding(defaultBuilding); }
+  else { document.getElementById('setup-page').classList.add('active'); }
+}
+
+function showErr(el, msg){ el.textContent=msg; el.style.display='block'; }
+
+/* ── STORAGE ── */
+function storageKey(){ return 'bcw-cards-' + (currentUser?.username||'anon') + '-' + (currentBuilding||'default'); }
+function load(){ try { cards = JSON.parse(localStorage.getItem(storageKey()) || '[]'); } catch(e){ cards=[]; } }
+function persist(){ try { localStorage.setItem(storageKey(), JSON.stringify(cards)); } catch(e){} }
+
+/* ── BARCODE ── */
+function drawBC(canvas, code, h){
+  try {
+    JsBarcode(canvas, String(code), { format:'CODE128', lineColor:'#000', background:'#fff', width:2, height:h||70, displayValue:false, margin:4 });
+    return true;
+  } catch(e){ return false; }
+}
+
+/* ── BUILDING SELECT ── */
+function selectBuilding(name){
+  currentBuilding = name;
+  try { localStorage.setItem('bcw-building', name); } catch(e){}
+  load();
+  document.getElementById('setup-page').classList.remove('active');
+  document.getElementById('app-page').classList.add('active');
+  document.getElementById('hdr-building').textContent = name;
+  const emailMap = {
+    'Grand One':   'svpg1concierge@related.com',
+    'Grand Two':   'svpg2concierge@related.com',
+    'Grand Three': 'svpg3concierge@related.com'
+  };
+  const email = emailMap[name] || '';
+  const el = document.getElementById('contact-email');
+  el.textContent = email;
+  el.href = 'mailto:' + email;
+  render();
+}
+
+function goSetup(){
+  document.getElementById('app-page').classList.remove('active');
+  document.getElementById('setup-page').classList.add('active');
+}
+
+/* ── INIT ── */
+function initView(){
+  try {
+    const session = JSON.parse(localStorage.getItem('bcw-session') || 'null');
+    if(session && session.username){
+      currentUser = session;
+      document.getElementById('hdr-logout').style.display='';
+      enterApp();
+      return;
+    }
+  } catch(e){}
+  document.getElementById('login-page').classList.add('active');
+}
+
+/* ── RENDER ── */
+const AMENITIES = [
+  { name: 'Ping Pong',         icon: '🏓' },
+  { name: 'Party Room',        icon: '🎉' },
+  { name: "Children's Play",   icon: '🧸' },
+  { name: 'Tennis',            icon: '🎾' },
+  { name: 'Lounge Area',       icon: '🛋️' },
+  { name: 'Spa Area',          icon: '🧖' },
+  { name: 'Swimming Pool',     icon: '🏊' },
+  { name: 'Fitness Center',    icon: '🏋️' },
+  { name: 'Basketball',        icon: '🏀' },
+];
+
+function resKey(){ return 'bcw-res-' + (currentUser?.username||'anon'); }
+function loadRes(){ try { return JSON.parse(localStorage.getItem(resKey()) || '[]'); } catch(e){ return []; } }
+function persistRes(r){ try { localStorage.setItem(resKey(), JSON.stringify(r)); } catch(e){} }
+
+function render(){
+  const stack = document.getElementById('card-stack');
+  const hdr = document.getElementById('hdr-count');
+  const fab = document.getElementById('add-card-fab');
+  const resSec = document.getElementById('res-section');
+  hdr.textContent = cards.length ? '1 card' : '';
+
+  if(!cards.length){
+    stack.innerHTML = `<div class="empty">
+      <div class="empty-ornament">&#10022;</div>
+      <h3>No cards yet</h3>
+      <div class="gold-rule"></div>
+      <p>Tap "Add card" to store your membership card.</p>
+    </div>`;
+    fab.style.display = '';
+    resSec.style.display = 'none';
+    return;
+  }
+
+  // Has card — show it, hide FAB, show reservations
+  fab.style.display = 'none';
+  resSec.style.display = 'block';
+
+  stack.innerHTML = '';
+  const c = cards[0];
+  const div = document.createElement('div');
+  div.className = 'member-card';
+  div.innerHTML = `
+    <div class="card-top">
+      <div class="card-color-dot" style="background:${c.color||'#1a1a1a'}"></div>
+      <div class="card-meta">
+        <div class="card-gym">${esc(c.name)}</div>
+        ${c.holder?`<div class="card-member">${esc(c.holder)}</div>`:''}
+      </div>
+      <div class="card-actions">
+        <button class="icon-btn" onclick="startEdit(0)" title="Edit">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M9 2L11 4L5 10H3V8L9 2Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="icon-btn danger" onclick="deleteCard(0)" title="Delete">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 3h9M5 3V2h3v1M4 3v7h5V3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="card-barcode" onclick="openScan(0)" title="Tap to scan fullscreen">
+      <canvas id="bc-0"></canvas>
+      <p class="card-code">${esc(c.code)}</p>
+      <p class="scan-hint">tap to scan</p>
+    </div>`;
+  stack.appendChild(div);
+  setTimeout(()=>{ const cv=document.getElementById('bc-0'); if(cv) drawBC(cv,c.code,65); },30);
+
+  renderAmenities();
+  renderMyRes();
+}
+
+function renderAmenities(){
+  const grid = document.getElementById('amenity-grid');
+  grid.innerHTML = AMENITIES.map(a => `
+    <div class="amenity-tile" onclick="openBookModal('${a.name}')">
+      <div class="amenity-icon">${a.icon}</div>
+      <div class="amenity-name">${a.name}</div>
+    </div>`).join('');
+}
+
+function renderMyRes(){
+  const list = document.getElementById('my-res-list');
+  const res = loadRes();
+  const now = new Date().toISOString().slice(0,10);
+  const upcoming = res.filter(r => r.date >= now).sort((a,b)=>a.date<b.date?-1:1);
+  if(!upcoming.length){
+    list.innerHTML = `<p style="font-size:12px;color:var(--text-3);letter-spacing:0.08em;padding:8px 0;">No upcoming reservations.</p>`;
+    return;
+  }
+  list.innerHTML = upcoming.map((r,i) => `
+    <div class="res-item">
+      <div class="res-item-left">
+        <div class="res-item-amenity">${esc(r.amenity)}</div>
+        <div class="res-item-when">${r.date} &nbsp;·&nbsp; ${esc(r.time)}</div>
+      </div>
+      <button class="res-cancel-btn" onclick="cancelRes('${r.id}')" title="Cancel">&#x2715;</button>
+    </div>`).join('');
+}
+
+let bookingAmenity = null;
+
+function openBookModal(amenity){
+  bookingAmenity = amenity;
+  document.getElementById('book-amenity-name').textContent = amenity;
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('book-date').value = '';
+  document.getElementById('book-date').min = today;
+  document.getElementById('book-time').value = '';
+  document.getElementById('book-err').style.display = 'none';
+  document.getElementById('book-modal-backdrop').classList.add('open');
+}
+
+function closeBookModal(){
+  document.getElementById('book-modal-backdrop').classList.remove('open');
+  bookingAmenity = null;
+}
+
+function handleBookBackdrop(e){
+  if(e.target === document.getElementById('book-modal-backdrop')) closeBookModal();
+}
+
+function confirmBooking(){
+  const date = document.getElementById('book-date').value;
+  const time = document.getElementById('book-time').value;
+  const err = document.getElementById('book-err');
+  if(!date){ err.textContent='Please select a date.'; err.style.display='block'; return; }
+  if(!time){ err.textContent='Please select a time slot.'; err.style.display='block'; return; }
+  err.style.display='none';
+  const res = loadRes();
+  res.push({ id: Date.now().toString(36), amenity: bookingAmenity, date, time });
+  persistRes(res);
+  closeBookModal();
+  renderMyRes();
+}
+
+function cancelRes(id){
+  if(!confirm('Cancel this reservation?')) return;
+  const res = loadRes().filter(r => r.id !== id);
+  persistRes(res);
+  renderMyRes();
+}
+
+function openModal(){
+  if(cards.length >= 1){ alert('You already have a card. Please remove it before adding a new one.'); return; }
+  editIdx=-1; selectedColor=COLORS[0]; document.getElementById('modal-title').textContent='New Card'; document.getElementById('inp-holder').value=''; document.getElementById('inp-code').value=''; document.getElementById('bc-preview').style.display='none'; document.getElementById('err-msg').style.display='none'; renderColorPicker(); document.getElementById('modal').classList.add('open'); setTimeout(()=>document.getElementById('inp-holder').focus(),100);
+}
+function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+function handleBackdrop(e){ if(e.target===document.getElementById('modal')) closeModal(); }
+function renderColorPicker(){ const cp=document.getElementById('color-picker'); cp.innerHTML=COLORS.map((c,i)=>`<div class="color-opt${c===selectedColor?' selected':''}" style="background:${c}" title="${COLOR_LABELS[i]}" onclick="pickColor('${c}',this)"></div>`).join(''); }
+function pickColor(c,el){ selectedColor=c; document.querySelectorAll('.color-opt').forEach(x=>x.classList.remove('selected')); el.classList.add('selected'); }
+
+function livePreview(){
+  const code=document.getElementById('inp-code').value.trim();
+  const wrap=document.getElementById('bc-preview');
+  const cv=document.getElementById('preview-canvas');
+  const txt=document.getElementById('preview-code-text');
+  if(code.length>=4){ const ok=drawBC(cv,code,55); wrap.style.display=ok?'flex':'none'; txt.textContent=code; }
+  else { wrap.style.display='none'; }
+}
+
+function saveCard(){
+  const holder=document.getElementById('inp-holder').value.trim();
+  const code=document.getElementById('inp-code').value.trim();
+  const err=document.getElementById('err-msg');
+  if(!holder){ err.textContent='Please enter a holder name.'; err.style.display='block'; return; }
+  if(!code){ err.textContent='Please enter a barcode number.'; err.style.display='block'; return; }
+  err.style.display='none';
+  const entry={name:holder, holder, code, color:selectedColor, added:Date.now()};
+  if(editIdx>=0){ cards[editIdx]=entry; } else { cards.push(entry); }
+  persist(); closeModal(); render();
+}
+
+function startEdit(i){
+  const c=cards[i]; editIdx=i; selectedColor=c.color||COLORS[0];
+  document.getElementById('modal-title').textContent='Edit Card';
+  document.getElementById('inp-holder').value=c.holder||c.name||'';
+  document.getElementById('inp-code').value=c.code;
+  document.getElementById('err-msg').style.display='none';
+  renderColorPicker(); livePreview();
+  document.getElementById('modal').classList.add('open');
+}
+
+function deleteCard(i){
+  if(!confirm('Remove "'+cards[i].name+'"?')) return;
+  cards.splice(i,1); persist(); render();
+}
+
+function openScan(i){
+  const c=cards[i];
+  document.getElementById('sv-gym').textContent=c.name;
+  document.getElementById('sv-member').textContent=c.holder||c.code;
+  document.getElementById('sv-code').textContent=c.code;
+  const sv=document.getElementById('scan-view'); sv.classList.add('open');
+  setTimeout(()=>{ const cv=document.getElementById('sv-canvas'); if(cv) drawBC(cv,c.code,120); },80);
+  sv.onclick=function(e){ if(e.target===sv||e.target.classList.contains('scan-tip')) closeScan(); };
+}
+
+function closeScan(){ document.getElementById('scan-view').classList.remove('open'); }
+
+/* ── CAMERA BARCODE SCANNER ── */
+let codeReader = null;
+
+function openCamScanner(){
+  document.getElementById('cam-overlay').classList.add('open');
+  document.getElementById('cam-status').textContent = 'Starting camera…';
+  try {
+    codeReader = new ZXing.BrowserMultiFormatReader();
+    codeReader.listVideoInputDevices().then(devices => {
+      const backCam = devices.find(d => /back|rear|environment/i.test(d.label)) || devices[devices.length - 1];
+      const deviceId = backCam ? backCam.deviceId : undefined;
+      document.getElementById('cam-status').textContent = 'Point camera at barcode…';
+      codeReader.decodeFromVideoDevice(deviceId, 'cam-video', (result, err) => {
+        if(result){
+          const code = result.getText();
+          document.getElementById('inp-code').value = code;
+          livePreview();
+          closeCamScanner();
+        }
+        if(err && !(err instanceof ZXing.NotFoundException)){
+          document.getElementById('cam-status').textContent = 'Scanning…';
+        }
+      });
+    }).catch(e => {
+      document.getElementById('cam-status').textContent = 'Camera not available.';
+    });
+  } catch(e) {
+    document.getElementById('cam-status').textContent = 'Scanner unavailable. Please type the number.';
+  }
+}
+
+function closeCamScanner(){
+  if(codeReader){ try { codeReader.reset(); } catch(e){} codeReader = null; }
+  document.getElementById('cam-overlay').classList.remove('open');
+}
+
+initView();
+</script>
+</body>
+</html>
